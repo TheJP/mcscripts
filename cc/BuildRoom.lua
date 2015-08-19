@@ -1,7 +1,31 @@
 --Searches for a slot with blocks.
 --This is blocking until it finds blocks, or the user inserts new blocks into to the turtles inventory.
 function findSlot()
+    local found = false
+    local told = false
+    repeat
+        --find slot with building blocks
+        for i = 1,16 do
+            if(turtle.getItemCount(i) > 0) then
+                turtle.select(i)
+                found = true
+                break
+            end
+        end
+        --Tell why the turtle stopped
+        if(not found and not told) then
+            print(os.getComputerLabel() .. " is waiting for new blocks")
+            told = true
+        end
+    until(found)
+end
 
+--Custom placeDown function, which performs a slot check.
+function placeDown()
+    if(not turtle.placeDown()) then
+        findSlot()
+        turtle.placeDown()
+    end
 end
 
 --Decides, which move function a turtle gets.
@@ -19,10 +43,11 @@ end
 --The following functions have a custom moving and placing behavior
 
 function buildPlatform(width, length)
+    --build platform in a snake pattern
     local move = turtle.forward
     for x = 1,width do
         for y = 1,length do
-            turtle.placeDown()
+            placeDown()
             move()
         end
         turtle.turnLeft()
@@ -31,13 +56,36 @@ function buildPlatform(width, length)
         move = toggleMove(move)
         move()
     end
+    --move back to starting position
+    if(width % 2 == 1) then
+        for i = 1,(length-1) do
+            turtle.back()
+        end
+    end
+    turtle.turnRight()
+    for i = 1,(width-1) do
+        turtle.forward()
+    end
+    turtle.turnLeft()
+end
+
+function buildWall(length)
+    for i = 1,length do
+        placeDown()
+        turtle.forward()
+    end
+    turtle.back()
 end
 
 function buildWalls(width, length)
+    local walls = { length, width, length, width }
+    for i = 1,4 do
+        buildWall(walls[i])
+        turtle.turnLeft()
+    end
 end
 
 function buildRoom(width, length, height)
-    
     buildPlatform(width, width)
     turtle.moveUp()
     for i = 1,height do
@@ -47,17 +95,25 @@ function buildRoom(width, length, height)
     buildPlatform(width, height)
 end
 
+--Prints the program usage.
+function usage()
+    print("Usage: " .. shell.getRunningProgram() .. " <length> <width> <height>")
+    print("The turtle is facing in the length direction 1 Block above floor level")
+    print("The turtle will build forward, to the right and up")
+end
+
 --Entry point of the application
 local args = {...}
 local argLength = table.getn(args);
 
 if(argLength ~= 3) then
-    print("Usage: " .. shell.getRunningProgram() .. " <length> <width> <height>")
-    print("The turtle is facing in the length direction 1 Block above floor level")
-    print("The turtle will build forward, to the right and up")
-    error()
+    usage() error()
 end
 
-local length, width, height = args[0], args[1], args[2]
+local length, width, height = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
+
+if(length < 3 or width < 3 or height < 1) then
+    usage() error()
+end
 
 buildRoom(width, length, height)
