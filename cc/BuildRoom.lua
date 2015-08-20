@@ -73,7 +73,7 @@ function buildPlatform(width, length)
         end
     end
     turtle.turnRight()
-    for i = 1,(width-1) do
+    for i = 1,width do
         turtle.forward()
     end
     turtle.turnLeft()
