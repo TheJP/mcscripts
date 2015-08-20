@@ -1,3 +1,13 @@
+--Created by TheJP
+--Script which builds basic cuboids using one block type
+
+--Prints the program usage.
+function usage()
+    print("Usage: " .. shell.getRunningProgram() .. " <length> <width> <height>")
+    print("The turtle is facing in the length direction 1 Block above floor level")
+    print("The turtle will build forward, to the right and up")
+end
+
 --Searches for a slot with blocks.
 --This is blocking until it finds blocks, or the user inserts new blocks into to the turtles inventory.
 function findSlot()
@@ -93,13 +103,6 @@ function buildRoom(width, length, height)
         turtle.moveUp()
     end
     buildPlatform(width, height)
-end
-
---Prints the program usage.
-function usage()
-    print("Usage: " .. shell.getRunningProgram() .. " <length> <width> <height>")
-    print("The turtle is facing in the length direction 1 Block above floor level")
-    print("The turtle will build forward, to the right and up")
 end
 
 --Entry point of the application
