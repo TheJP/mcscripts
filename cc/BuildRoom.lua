@@ -96,7 +96,7 @@ function buildWalls(width, length)
 end
 
 function buildRoom(width, length, height)
-    buildPlatform(width, width)
+    buildPlatform(width, length)
     turtle.up()
     for i = 1,height do
         buildWalls(width, length)
