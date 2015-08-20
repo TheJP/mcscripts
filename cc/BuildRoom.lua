@@ -102,7 +102,7 @@ function buildRoom(width, length, height)
         buildWalls(width, length)
         turtle.up()
     end
-    buildPlatform(width, height)
+    buildPlatform(width, length)
 end
 
 --Entry point of the application
