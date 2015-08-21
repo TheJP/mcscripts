@@ -15,11 +15,15 @@ end
 dir = ".exv/"
 dimFile = "dimension.dat"
 stateFile = "state.dat"
+countFile = "count.dat"
 
 stateDown = "d"
 stateUp = "u"
 stateUnload = "l"
+stateUnload2 = "2"
+stateUnload3 = "3"
 stateSearchNext = "s"
+stateSearchNext2 = "b"
 
 --Initializes the program.
 function init()
@@ -34,6 +38,7 @@ function findSlot()
             return i
         end
     end
+    return -1
 end
 
 --Checks if turtle has empty slot.
@@ -105,6 +110,7 @@ end
 function continue()
     local dimension = tonumber(get(dimFile))
     local state = get(stateFile)
+    local count = get(countFile)
     while(true) do
         if(state == stateDown) then
             if(not hasEmptySlot()) then
@@ -122,11 +128,72 @@ function continue()
             end
         elseif(state == stateUnload) then
             if(not back()) then
-                --todo
+                --There is an inconsistency: If the turtle reboots between the following 2 steps, the system breaks!
+                --This could be avoided, by having a compass or only digging 1 wide tunnels.
+                state = set(stateFile, stateUnload2)
+                turtle.turnLeft()
             end
-            --todo
+        elseif(state == stateUnload2) then
+            if(not back()) then
+                --There is an inconsistency: If the turtle reboots between the following 2 steps, the system breaks!
+                --This could be avoided, by having a compass or only digging 1 wide tunnels.
+                state = set(stateFile, stateUnload3)
+                turtle.turnRight()
+            end
+        elseif(state == stateUnload3) then
+            if(findSlot() > 0) then
+                if(not turtle.dropUp()) then
+                    print("Target inventory is full")
+                    print("Clear out space in the inventory and then restart the program without parameter")
+                    error()
+                end
+            else
+                if(count >= (dimension*dimension) - 1) then
+                    print("Finished the job!")
+                    error()
+                end
+                count = set(countFile, 0)
+                state = set(stateFile, stateSearchNext)
+            end
         elseif(state == stateSearchNext) then
-            --todo
+            if(count >= (dimension*dimension) - 1) then
+                state = set(stateFile, stateUnload)
+            elseif(count % dimension >= dimension - 1) then
+                --End reched in length: go back, and move to next row
+                if(not back()) then
+                    --There is an inconsistency: If the turtle reboots between the following 2 steps, the system breaks!
+                    --This could be avoided, by having a compass or only digging 1 wide tunnels.
+                    state = set(stateFile, stateSearchNext2)
+                    turtle.turnLeft()
+                end
+            else
+                if(turtle.inspectDown()) then
+                    state = set(stateFile, stateDown)
+                else
+                    turtle.dig()
+                    --There is an inconsistency: If the turtle reboots between the following 2 steps, the system breaks!
+                    --This could be avoided, if there was no dimesion constraint to the turtle
+                    --The only "bad thing" that could happen is, that the turtle digs too far
+                    if(forward()) then
+                        count = set(countFile, count + 1)
+                    end
+                end
+            end
+        elseif(state == stateSearchNext2) then
+            if(count % dimension >= dimension - 1) then
+                turtle.dig()
+                --There is an inconsistency: If the turtle reboots between the following 2 steps, the system breaks!
+                --This could be avoided, if there was no dimesion constraint to the turtle
+                --The only "bad thing" that could happen is, that the turtle digs too far
+                if(forward()) then
+                    count = set(countFile, count + 1)
+                end
+            else
+                --There is an inconsistency: If the turtle reboots between the following 2 steps, the system breaks!
+                --This could be avoided, by having a compass or only digging 1 wide tunnels.
+                state = set(stateFile, stateSearchNext)
+                turtle.turnRight()
+            end
         else
             print("Unknown state")
             error()

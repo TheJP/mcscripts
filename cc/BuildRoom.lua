@@ -60,9 +60,9 @@ function buildPlatform(width, length)
             placeDown()
             move()
         end
-        turtle.turnLeft()
-        turtle.forward()
         turtle.turnRight()
+        turtle.forward()
+        turtle.turnLeft()
         move = toggleMove(move)
         move()
     end
@@ -72,11 +72,11 @@ function buildPlatform(width, length)
             turtle.back()
         end
     end
-    turtle.turnRight()
+    turtle.turnLeft()
     for i = 1,width do
         turtle.forward()
     end
-    turtle.turnLeft()
+    turtle.turnRight()
 end
 
 function buildWall(length)
